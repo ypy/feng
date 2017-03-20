@@ -47,6 +47,16 @@ router.route('/movies')
         });
     });
 
+router.route('/search/:title').get(function (req, res) {
+    var regex = new RegExp(req.params.title, "i")
+    Movie.find({ title: regex }, function (err, movies) {
+        if (err) {
+            return res.send(err);
+        }
+        res.json(movies);
+    });
+});
+
 router.route('/movies/:id').put(function (req, res) {
     Movie.findOne({ _id: req.params.id }, function (err, movie) {
         if (err) {
