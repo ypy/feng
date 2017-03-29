@@ -7,10 +7,29 @@ var mongoose = require("mongoose");
 mongoose.connect("mongodb://127.0.0.1:27017/test");
 
 
+
 var Movie = require('./models');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:4200');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
 
 var port = process.env.PORT || 8080;
 
@@ -24,17 +43,19 @@ router.use(function (req, res, next) {
 
 
 router.get('/', function (req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });
+    res.jsonp({ Message: 'hooray! welcome to our api!' });
+    
 });
 
 router.route('/movies')
     .post(function (req, res) {
+        res.header("Access-Control-Allow-Origin", "*");
         let movie = new Movie(req.body);
         movie.save(function (err) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'movie created!' });
+            res.jsonp({ message: 'movie created!' });
         });
 
     })
@@ -43,7 +64,7 @@ router.route('/movies')
             if (err) {
                 return res.send(err);
             }
-            res.json(movies);
+            res.jsonp(movies);
         });
     });
 
@@ -53,7 +74,7 @@ router.route('/search/:title').get(function (req, res) {
         if (err) {
             return res.send(err);
         }
-        res.json(movies);
+        res.jsonp(movies);
     });
 });
 
@@ -73,7 +94,7 @@ router.route('/movies/:id').put(function (req, res) {
                 return res.send(err);
             }
 
-            res.json({ message: 'Movie updated!' });
+            res.jsonp({ message: 'Movie updated!' });
         });
     });
 }).get(function (req, res) {
@@ -82,9 +103,10 @@ router.route('/movies/:id').put(function (req, res) {
             return res.send(err);
         }
 
-        res.json(movie);
+        res.jsonp(movie);
     });
 }).delete(function (req, res) {
+    //res.header("Access-Control-Allow-Origin", "*"); 
     Movie.remove({
         _id: req.params.id
     }, function (err, movie) {
@@ -92,7 +114,7 @@ router.route('/movies/:id').put(function (req, res) {
             return res.send(err);
         }
 
-        res.json({ message: 'Successfully deleted' });
+        res.jsonp({ message: 'Successfully deleted' });
     });
 });
 
